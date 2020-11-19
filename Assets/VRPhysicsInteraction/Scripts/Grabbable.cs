@@ -9,7 +9,7 @@ namespace VRPhysicsInteraction
     {
         public const string GrabbableLayer = "Grabbable";
 
-        public bool ContinousPhsyics = true;
+        public bool ContinuousPhsyics = true;
         public Material OutlineMat;
 
         public bool IsGrabbed { get; private set; }
@@ -21,9 +21,9 @@ namespace VRPhysicsInteraction
         {
             // Physics
             Rigidbody = GetComponent<Rigidbody>();
-            Rigidbody.collisionDetectionMode = ContinousPhsyics ? CollisionDetectionMode.Continuous : CollisionDetectionMode.Discrete;
+            Rigidbody.collisionDetectionMode = ContinuousPhsyics ? CollisionDetectionMode.Continuous : CollisionDetectionMode.Discrete;
             // Layers
-            gameObject.layer = LayerMask.NameToLayer(GrabbableLayer);
+            Utils.SetLayerRecursively(gameObject, LayerMask.NameToLayer(GrabbableLayer));
             // Outline
             CreateOutline();
             EnableOutline(false);

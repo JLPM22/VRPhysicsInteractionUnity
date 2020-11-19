@@ -62,7 +62,7 @@ namespace VRPhysicsInteraction
                 if (CurrentGrab == null && GrabColliders[0] != CurrentOutlineCollider)
                 {
                     CurrentOutlineCollider = GrabColliders[0];
-                    CurrentOutline = GrabColliders[0].GetComponent<Grabbable>();
+                    CurrentOutline = GrabColliders[0].GetComponentInParent<Grabbable>();
                 }
 
                 CurrentOutline?.EnableOutline(true);
@@ -124,11 +124,14 @@ namespace VRPhysicsInteraction
         private void Rotate()
         {
             Quaternion targetRot = TrackingSpace.rotation;
-            const float frequency = 3.0f;
-            const float damping = 3.5f;
+            const float frequency = 2.0f;
+            const float dampingMin = 2.0f;
+            const float dampingMax = 10.0f;
+            float damping = CurrentGrab == null ? dampingMin : Mathf.Lerp(dampingMin, dampingMax, CurrentGrab.Rigidbody.mass / 7.5f);
             const float kpConst = (6.0f * frequency) * (6.0f * frequency) * 0.25f;
             float kp = kpConst * RotationStrength;
-            const float kd = 4.5f * frequency * damping;
+            const float kdConst = 4.5f * frequency;
+            float kd = kdConst * damping;
             float dt = Time.fixedDeltaTime;
             float diff = Quaternion.Angle(Rigidbody.rotation, targetRot);
             targetRot = Quaternion.Lerp(Rigidbody.rotation, targetRot, Mathf.Clamp(diff, 0.0f, 2.5f) / 3.0f);
@@ -255,15 +258,6 @@ namespace VRPhysicsInteraction
             yield return WaitForFixedUpdate;
             FixedJoint.breakForce = BreakForce;
             FixedJoint.breakTorque = BreakForce;
-
-            // FixedJoint f = rb.gameObject.AddComponent<FixedJoint>();
-            // f.connectedBody = Rigidbody;
-            // f.breakForce = float.PositiveInfinity;
-            // f.breakTorque = float.PositiveInfinity;
-            // f.connectedMassScale = 1;
-            // f.massScale = 1;
-            // f.enableCollision = false;
-            // f.enablePreprocessing = false;
         }
 
         private void OnJointBreak(float breakForce)
