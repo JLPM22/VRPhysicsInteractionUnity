@@ -23,6 +23,7 @@ namespace VRPhysicsInteraction
         [Header("Physics")]
         public float RotationStrength = 20.0f;
         public float VelocityStrength = 0.2f;
+        public float BreakForce = 2000.0f;
 
         private Rigidbody Rigidbody;
         private FixedJoint FixedJoint;
@@ -84,8 +85,6 @@ namespace VRPhysicsInteraction
                 else if (CurrentGrab != null && OVRInput.GetUp(OVRInput.Button.PrimaryHandTrigger, Controller))
                 {
                     ReleaseCurrentGrabbed();
-                    CurrentGrab.SetGrabbed(false);
-                    CurrentGrab = null;
                 }
             }
             else
@@ -222,6 +221,8 @@ namespace VRPhysicsInteraction
 
         private void ReleaseCurrentGrabbed()
         {
+            CurrentGrab.SetGrabbed(false);
+            CurrentGrab = null;
             for (int f = 0; f < Fingers.Length; ++f) SetFingersInterpolation(f, 0.0f);
             if (FixedJoint != null) GameObject.Destroy(FixedJoint);
         }
@@ -251,6 +252,9 @@ namespace VRPhysicsInteraction
             FixedJoint.massScale = 1;
             FixedJoint.enableCollision = false;
             FixedJoint.enablePreprocessing = false;
+            yield return WaitForFixedUpdate;
+            FixedJoint.breakForce = BreakForce;
+            FixedJoint.breakTorque = BreakForce;
 
             // FixedJoint f = rb.gameObject.AddComponent<FixedJoint>();
             // f.connectedBody = Rigidbody;
@@ -260,6 +264,11 @@ namespace VRPhysicsInteraction
             // f.massScale = 1;
             // f.enableCollision = false;
             // f.enablePreprocessing = false;
+        }
+
+        private void OnJointBreak(float breakForce)
+        {
+            ReleaseCurrentGrabbed();
         }
     }
 }

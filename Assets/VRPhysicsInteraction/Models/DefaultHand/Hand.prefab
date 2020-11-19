@@ -844,7 +844,7 @@ MonoBehaviour:
   - {fileID: 2690853120635544892}
   FingersInterpolationStep: 0.1
   RotationStrength: 20
-  VelocityStrength: 0.2
+  VelocityStrength: 0.4
 --- !u!1 &2690853120635582790
 GameObject:
   m_ObjectHideFlags: 0
