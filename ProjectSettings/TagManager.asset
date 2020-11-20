@@ -15,11 +15,11 @@ TagManager:
   - 
   - Grabbable
   - Player
-  - Hand
-  - 
-  - 
-  - 
-  - 
+  - HandL
+  - GrabbedR
+  - GrabbedL
+  - GrabbedB
+  - HandR
   - 
   - 
   - 

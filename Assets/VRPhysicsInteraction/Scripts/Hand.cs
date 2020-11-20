@@ -29,7 +29,6 @@ namespace VRPhysicsInteraction
         private FixedJoint FixedJoint;
 
         private List<Collider> GrabColliders = new List<Collider>();
-        private int GrabbableLayer;
 
         private Collider CurrentOutlineCollider = null;
         private Grabbable CurrentOutline = null;
@@ -47,8 +46,6 @@ namespace VRPhysicsInteraction
                 FingersColliders[f] = Fingers[f].GetComponentInChildren<Finger>();
                 Debug.Assert(FingersColliders[f] != null, "Assign a Finger component to all fingers of your hand");
             }
-            // Layers
-            GrabbableLayer = LayerMask.NameToLayer(Grabbable.GrabbableLayer);
             // Reset Fingers
             for (int f = 0; f < Fingers.Length; ++f) SetFingersInterpolation(f, 0.0f);
             // Physics
@@ -57,6 +54,18 @@ namespace VRPhysicsInteraction
 
         private void Update()
         {
+
+            // Grab / Release
+            if (OVRInput.GetDown(OVRInput.Button.PrimaryHandTrigger, Controller))
+            {
+                Grab();
+            }
+            else if (CurrentGrab != null && OVRInput.GetUp(OVRInput.Button.PrimaryHandTrigger, Controller))
+            {
+                ReleaseCurrentGrabbed();
+            }
+
+            // Outline
             if (GrabColliders.Count > 0)
             {
                 if (CurrentGrab == null && GrabColliders[0] != CurrentOutlineCollider)
@@ -66,26 +75,6 @@ namespace VRPhysicsInteraction
                 }
 
                 CurrentOutline?.EnableOutline(true);
-
-                if (OVRInput.GetDown(OVRInput.Button.PrimaryHandTrigger, Controller))
-                {
-                    CurrentGrab = CurrentOutline;
-                    if (FixCurrentGrabbed())
-                    {
-                        CurrentGrab.SetGrabbed(true);
-                        CurrentOutline.EnableOutline(false);
-                        CurrentOutlineCollider = null;
-                        CurrentOutline = null;
-                    }
-                    else
-                    {
-                        CurrentGrab = null;
-                    }
-                }
-                else if (CurrentGrab != null && OVRInput.GetUp(OVRInput.Button.PrimaryHandTrigger, Controller))
-                {
-                    ReleaseCurrentGrabbed();
-                }
             }
             else
             {
@@ -123,16 +112,14 @@ namespace VRPhysicsInteraction
         /* https://digitalopus.ca/site/pd-controllers/ */
         private void Rotate()
         {
-            Quaternion targetRot = TrackingSpace.rotation;
-            const float frequency = 2.0f;
-            const float dampingMin = 2.0f;
-            const float dampingMax = 10.0f;
-            float damping = CurrentGrab == null ? dampingMin : Mathf.Lerp(dampingMin, dampingMax, CurrentGrab.Rigidbody.mass / 7.5f);
-            const float kpConst = (6.0f * frequency) * (6.0f * frequency) * 0.25f;
-            float kp = kpConst * RotationStrength;
-            const float kdConst = 4.5f * frequency;
-            float kd = kdConst * damping;
             float dt = Time.fixedDeltaTime;
+            Quaternion targetRot = TrackingSpace.rotation;
+            // kp and kp constants
+            float frequency = CurrentGrab?.Frecuency ?? 2.0f;
+            float damping = CurrentGrab?.Damping ?? 2.0f;
+            float kp = (6.0f * frequency) * (6.0f * frequency) * 0.25f * RotationStrength;
+            float kd = 4.5f * frequency * damping;
+            // Clamp maximum rotation
             float diff = Quaternion.Angle(Rigidbody.rotation, targetRot);
             targetRot = Quaternion.Lerp(Rigidbody.rotation, targetRot, Mathf.Clamp(diff, 0.0f, 2.5f) / 3.0f);
             Quaternion q = targetRot * Quaternion.Inverse(Rigidbody.rotation);
@@ -162,7 +149,8 @@ namespace VRPhysicsInteraction
 
         private void OnTriggerEnter(Collider other)
         {
-            if (other.gameObject.layer == GrabbableLayer)
+            int oppositeLayer = Controller == OVRInput.Controller.RTouch ? Grabbable.GrabbedLayerL : Grabbable.GrabbedLayerR;
+            if (other.gameObject.layer == Grabbable.GrabbableLayer || other.gameObject.layer == oppositeLayer)
             {
                 GrabColliders.Add(other);
             }
@@ -170,9 +158,32 @@ namespace VRPhysicsInteraction
 
         private void OnTriggerExit(Collider other)
         {
-            if (other.gameObject.layer == GrabbableLayer)
+            int test = other.gameObject.layer & (Grabbable.GrabbableLayer |
+                                                 Grabbable.GrabbedLayerB |
+                                                 Grabbable.GrabbedLayerL |
+                                                 Grabbable.GrabbedLayerR);
+            if (test != 0)
             {
                 GrabColliders.Remove(other);
+            }
+        }
+
+        private void Grab()
+        {
+            if (CurrentOutline != null)
+            {
+                CurrentGrab = CurrentOutline;
+                if (FixCurrentGrabbed())
+                {
+                    CurrentGrab.SetGrabbed(true, Controller == OVRInput.Controller.RTouch);
+                    CurrentOutline.EnableOutline(false);
+                    CurrentOutlineCollider = null;
+                    CurrentOutline = null;
+                }
+                else
+                {
+                    CurrentGrab = null;
+                }
             }
         }
 
@@ -181,7 +192,8 @@ namespace VRPhysicsInteraction
         /// </summary>
         private bool AdjustPalm()
         {
-            if (Physics.SphereCast(Palm.position - Palm.forward * PalmRadius * 2, PalmRadius, Palm.forward, out RaycastHit hit, PalmRadius * 3, 1 << GrabbableLayer))
+            int oppositeLayer = Controller == OVRInput.Controller.RTouch ? Grabbable.GrabbedLayerL : Grabbable.GrabbedLayerR;
+            if (Physics.SphereCast(Palm.position - Palm.forward * PalmRadius * 2, PalmRadius, Palm.forward, out RaycastHit hit, PalmRadius * 3, 1 << Grabbable.GrabbableLayer | 1 << oppositeLayer))
             {
                 Vector3 offset = hit.point - Palm.position;
                 // TODO: Temporal
@@ -214,7 +226,7 @@ namespace VRPhysicsInteraction
                 for (float t = 0.0f; t <= 1.0f; t += FingersInterpolationStep)
                 {
                     SetFingersInterpolation(f, t);
-                    if (Physics.CheckSphere(finger.transform.position, finger.Radius, 1 << GrabbableLayer))
+                    if (Physics.CheckSphere(finger.transform.position, finger.Radius, 1 << Grabbable.GrabbableLayer))
                     {
                         break;
                     }
@@ -224,7 +236,7 @@ namespace VRPhysicsInteraction
 
         private void ReleaseCurrentGrabbed()
         {
-            CurrentGrab.SetGrabbed(false);
+            CurrentGrab.SetGrabbed(false, Controller == OVRInput.Controller.RTouch);
             CurrentGrab = null;
             for (int f = 0; f < Fingers.Length; ++f) SetFingersInterpolation(f, 0.0f);
             if (FixedJoint != null) GameObject.Destroy(FixedJoint);
@@ -255,9 +267,12 @@ namespace VRPhysicsInteraction
             FixedJoint.massScale = 1;
             FixedJoint.enableCollision = false;
             FixedJoint.enablePreprocessing = false;
-            yield return WaitForFixedUpdate;
-            FixedJoint.breakForce = BreakForce;
-            FixedJoint.breakTorque = BreakForce;
+            for (int i = 0; i < 90; ++i) yield return WaitForFixedUpdate; // Wait some frames before applying break forces
+            if (FixedJoint != null)
+            {
+                FixedJoint.breakForce = BreakForce;
+                FixedJoint.breakTorque = BreakForce;
+            }
         }
 
         private void OnJointBreak(float breakForce)
