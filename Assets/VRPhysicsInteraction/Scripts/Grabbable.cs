@@ -80,16 +80,22 @@ namespace VRPhysicsInteraction
                 {
                     IsGrabbedRight = false;
                     if (IsGrabbedLeft) Utils.SetLayerRecursively(gameObject, GrabbedLayerL);
-                    else Utils.SetLayerRecursively(gameObject, GrabbableLayer);
+                    else StartCoroutine(SetLayerDelay(gameObject, GrabbableLayer));
                 }
                 else
                 {
                     IsGrabbedLeft = false;
                     if (IsGrabbedRight) Utils.SetLayerRecursively(gameObject, GrabbedLayerR);
-                    else Utils.SetLayerRecursively(gameObject, GrabbableLayer);
+                    else StartCoroutine(SetLayerDelay(gameObject, GrabbableLayer));
                 }
 
             }
+        }
+
+        private IEnumerator SetLayerDelay(GameObject gO, int layer)
+        {
+            for (int i = 0; i < 240; ++i) yield return null;
+            Utils.SetLayerRecursively(gO, layer);
         }
 
         public void EnableOutline(bool value)

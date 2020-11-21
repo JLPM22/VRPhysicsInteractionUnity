@@ -32,26 +32,6 @@ namespace VRMovement
 
         public Vector3 Update(float deltaTime)
         {
-            Transform root = CameraRig.trackingSpace;
-            Transform centerEye = CameraRig.centerEyeAnchor;
-
-            // Rotate Y Axis
-            Vector3 prevPos = root.position;
-            Quaternion prevRot = root.rotation;
-
-            Transform.rotation = Quaternion.Euler(0.0f, centerEye.rotation.eulerAngles.y, 0.0f);
-
-            root.position = prevPos;
-            root.rotation = prevRot;
-
-            // Adjust Height
-            Vector3 p = CameraRig.transform.localPosition;
-            if (OVRManager.instance.trackingOriginType == OVRManager.TrackingOrigin.FloorLevel)
-            {
-                p.y = -(0.5f * CharacterController.height) + CharacterController.center.y;
-            }
-            CameraRig.transform.localPosition = p;
-
             // Movement
             Vector3 moveDirection = UpdateMovement(deltaTime);
 
@@ -91,7 +71,7 @@ namespace VRMovement
                 moveScale = 0.0f;
 
             // Position
-            Vector2 primaryAxis = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick);
+            Vector2 primaryAxis = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.RTouch);
 
             Quaternion ort = Transform.rotation;
             Vector3 ortEuler = ort.eulerAngles;

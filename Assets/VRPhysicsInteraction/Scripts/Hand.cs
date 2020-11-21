@@ -8,6 +8,9 @@ namespace VRPhysicsInteraction
     [RequireComponent(typeof(Rigidbody))]
     public class Hand : MonoBehaviour
     {
+        public static int HandRightLayer;
+        public static int HandLeftLayer;
+
         [Header("General")]
         public OVRInput.Controller Controller;
         public Transform TrackingSpace;
@@ -50,6 +53,9 @@ namespace VRPhysicsInteraction
             for (int f = 0; f < Fingers.Length; ++f) SetFingersInterpolation(f, 0.0f);
             // Physics
             Rigidbody.centerOfMass = Vector3.zero;
+            // Layers
+            HandRightLayer = LayerMask.NameToLayer("HandR");
+            HandLeftLayer = LayerMask.NameToLayer("HandL");
         }
 
         private void Update()
