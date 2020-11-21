@@ -25,7 +25,7 @@ namespace VRPhysicsInteraction
         public float VelocityStrength = 0.2f;
         public float BreakForce = 2000.0f;
 
-        private Rigidbody Rigidbody;
+        public Rigidbody Rigidbody;
         private FixedJoint FixedJoint;
 
         private List<Collider> GrabColliders = new List<Collider>();
@@ -54,7 +54,6 @@ namespace VRPhysicsInteraction
 
         private void Update()
         {
-
             // Grab / Release
             if (OVRInput.GetDown(OVRInput.Button.PrimaryHandTrigger, Controller))
             {
@@ -94,18 +93,18 @@ namespace VRPhysicsInteraction
         private void Move()
         {
             Vector3 targetPos = TrackingSpace.position;
-            float distanceToTarget = Vector3.Distance(targetPos, transform.position);
+            float distanceToTarget = Vector3.Distance(targetPos, Rigidbody.position);
 
-            const float epsilon = 0.01f;
-            if (distanceToTarget < epsilon)
-            {
-                transform.position = targetPos;
-                distanceToTarget = 0.0f;
-            }
+            // const float epsilon = 0.005f;
+            // if (distanceToTarget < epsilon)
+            // {
+            //     Rigidbody.position = targetPos;
+            //     distanceToTarget = 0.0f;
+            // }
 
             // This is an impulse, we are not calculating an acceleration but a velocity
             float dt = Time.fixedDeltaTime / VelocityStrength;
-            Vector3 force = Rigidbody.mass * (targetPos - transform.position - Rigidbody.velocity * dt) / dt;
+            Vector3 force = Rigidbody.mass * ((targetPos - Rigidbody.position) - Rigidbody.velocity * dt) / dt;
             Rigidbody.AddForce(force, ForceMode.Impulse);
         }
 

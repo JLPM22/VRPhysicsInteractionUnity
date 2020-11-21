@@ -589,7 +589,9 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 9
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 11400010, guid: ce816f2e6abb0504092c23ed9b970dfd, type: 3}
+    - {fileID: 11462408, guid: ce816f2e6abb0504092c23ed9b970dfd, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: ce816f2e6abb0504092c23ed9b970dfd, type: 3}
 --- !u!4 &260110063 stripped
 Transform:
@@ -730,6 +732,33 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 1
+--- !u!1 &389815849 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 100008, guid: ce816f2e6abb0504092c23ed9b970dfd,
+    type: 3}
+  m_PrefabInstance: {fileID: 260110062}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &389815852
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 389815849}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 668cdd68f45460142b107ca79e83ab48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  EnableJoystick: 1
+  Speed: 1
+  BackAndSideDampen: 0.5
+  GravityModifier: 1
+  Acceleration: 10
+  HandRight: {fileID: 488992083}
+  HandLeft: {fileID: 1774475970}
+  TrackinSpaceRightHand: {fileID: 260110063}
+  TrackinSpaceLeftHand: {fileID: 260110064}
 --- !u!1 &453540046
 GameObject:
   m_ObjectHideFlags: 0
@@ -823,6 +852,18 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 453540046}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &488992083 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2411788075090560106, guid: ca9c404ca2194394db85b70181bc262c,
+    type: 3}
+  m_PrefabInstance: {fileID: 1789783944313258320}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22821871a4bb2bd4cb250169305d679d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -1304,7 +1345,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1005233064
 Transform:
   m_ObjectHideFlags: 0
@@ -1975,6 +2016,18 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1700386568}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1774475970 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5759198557512436231, guid: 6ed1f01f431510544ba10de3746e1971,
+    type: 3}
+  m_PrefabInstance: {fileID: 8521439317731443584}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22821871a4bb2bd4cb250169305d679d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2028720631
 GameObject:
   m_ObjectHideFlags: 0
@@ -1992,7 +2045,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2028720632
 Transform:
   m_ObjectHideFlags: 0

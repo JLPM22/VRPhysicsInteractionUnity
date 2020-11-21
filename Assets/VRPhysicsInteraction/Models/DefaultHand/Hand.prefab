@@ -815,7 +815,7 @@ Rigidbody:
   m_AngularDrag: 5
   m_UseGravity: 0
   m_IsKinematic: 0
-  m_Interpolate: 0
+  m_Interpolate: 2
   m_Constraints: 0
   m_CollisionDetection: 1
 --- !u!114 &4156527213059627244
@@ -845,6 +845,7 @@ MonoBehaviour:
   FingersInterpolationStep: 0.1
   RotationStrength: 20
   VelocityStrength: 0.4
+  BreakForce: 2000
 --- !u!1 &2690853120635582790
 GameObject:
   m_ObjectHideFlags: 0
