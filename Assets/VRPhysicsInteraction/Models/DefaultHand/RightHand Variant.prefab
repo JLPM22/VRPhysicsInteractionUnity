@@ -232,6 +232,16 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 14
       objectReference: {fileID: 0}
+    - target: {fileID: 5623127612886563709, guid: d63a5383911a44048acf16f783657b5d,
+        type: 3}
+      propertyPath: Controller
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5623127612886563709, guid: d63a5383911a44048acf16f783657b5d,
+        type: 3}
+      propertyPath: Hand
+      value: 
+      objectReference: {fileID: 2411788075090560106}
     - target: {fileID: 6645720149865263605, guid: d63a5383911a44048acf16f783657b5d,
         type: 3}
       propertyPath: m_Layer
@@ -249,3 +259,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d63a5383911a44048acf16f783657b5d, type: 3}
+--- !u!114 &2411788075090560106 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4156527213059627244, guid: d63a5383911a44048acf16f783657b5d,
+    type: 3}
+  m_PrefabInstance: {fileID: 1789783943229348998}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22821871a4bb2bd4cb250169305d679d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

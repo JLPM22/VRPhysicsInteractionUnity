@@ -59,7 +59,7 @@ namespace VRMovement
 
         private void Start()
         {
-            TeleportLayerMask = ~(1 << Hand.HandLeftLayer | 1 << Hand.HandRightLayer | 1 << Grabbable.GrabbableLayer |
+            TeleportLayerMask = ~(1 << Hand.HandLeftLayer | 1 << Hand.HandRightLayer | 1 << Grabbable.GrabbableLayer | 1 << Hand.PlayerLayer |
                                   1 << Grabbable.GrabbedLayerB | 1 << Grabbable.GrabbedLayerL | 1 << Grabbable.GrabbedLayerR);
         }
 
@@ -147,9 +147,12 @@ namespace VRMovement
             // Joystick
             if (EnableJoystick && !BlockJoystick)
             {
-                JoystickMovement.Update(Time.fixedDeltaTime);
-                HandRight.Rigidbody.position = TrackingSpaceRightHand.position;
-                HandLeft.Rigidbody.position = TrackingSpaceLeftHand.position;
+                Vector3 movement = JoystickMovement.Update(Time.fixedDeltaTime);
+                if (movement != Vector3.zero)
+                {
+                    HandRight.Rigidbody.position = TrackingSpaceRightHand.position;
+                    HandLeft.Rigidbody.position = TrackingSpaceLeftHand.position;
+                }
             }
 
             // Teleport

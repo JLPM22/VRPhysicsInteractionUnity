@@ -7,7 +7,7 @@ namespace VRPhysicsInteraction
     [RequireComponent(typeof(Rigidbody))]
     public class Grabbable : MonoBehaviour
     {
-        public static int GrabbableLayer;
+        public static int GrabbableLayer = -1;
         public static int GrabbedLayerR;
         public static int GrabbedLayerL;
         public static int GrabbedLayerB;
@@ -30,13 +30,7 @@ namespace VRPhysicsInteraction
         public Rigidbody Rigidbody { get; private set; }
         public bool IsGrabbedRight { get; private set; }
         public bool IsGrabbedLeft { get; private set; }
-        public int GrabCount
-        {
-            get
-            {
-                return (IsGrabbedRight ? 1 : 0) + (IsGrabbedLeft ? 1 : 0);
-            }
-        }
+        public int GrabCount { get { return (IsGrabbedRight ? 1 : 0) + (IsGrabbedLeft ? 1 : 0); } }
 
         private GameObject Outline;
 
@@ -46,10 +40,13 @@ namespace VRPhysicsInteraction
             Rigidbody = GetComponent<Rigidbody>();
             Rigidbody.collisionDetectionMode = ContinuousPhsyics ? CollisionDetectionMode.Continuous : CollisionDetectionMode.Discrete;
             // Layers
-            GrabbableLayer = LayerMask.NameToLayer("Grabbable");
-            GrabbedLayerR = LayerMask.NameToLayer("GrabbedR");
-            GrabbedLayerL = LayerMask.NameToLayer("GrabbedL");
-            GrabbedLayerB = LayerMask.NameToLayer("GrabbedB");
+            if (GrabbableLayer == -1)
+            {
+                GrabbableLayer = LayerMask.NameToLayer("Grabbable");
+                GrabbedLayerR = LayerMask.NameToLayer("GrabbedR");
+                GrabbedLayerL = LayerMask.NameToLayer("GrabbedL");
+                GrabbedLayerB = LayerMask.NameToLayer("GrabbedB");
+            }
             Utils.SetLayerRecursively(gameObject, GrabbableLayer);
             // Outline
             CreateOutline();
@@ -80,22 +77,16 @@ namespace VRPhysicsInteraction
                 {
                     IsGrabbedRight = false;
                     if (IsGrabbedLeft) Utils.SetLayerRecursively(gameObject, GrabbedLayerL);
-                    else StartCoroutine(SetLayerDelay(gameObject, GrabbableLayer));
+                    else Utils.SetLayerRecursively(gameObject, GrabbableLayer);
                 }
                 else
                 {
                     IsGrabbedLeft = false;
                     if (IsGrabbedRight) Utils.SetLayerRecursively(gameObject, GrabbedLayerR);
-                    else StartCoroutine(SetLayerDelay(gameObject, GrabbableLayer));
+                    else Utils.SetLayerRecursively(gameObject, GrabbedLayerL);
                 }
 
             }
-        }
-
-        private IEnumerator SetLayerDelay(GameObject gO, int layer)
-        {
-            for (int i = 0; i < 240; ++i) yield return null;
-            Utils.SetLayerRecursively(gO, layer);
         }
 
         public void EnableOutline(bool value)

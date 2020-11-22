@@ -10,6 +10,7 @@ namespace VRPhysicsInteraction
     {
         public static int HandRightLayer;
         public static int HandLeftLayer;
+        public static int PlayerLayer;
 
         [Header("General")]
         public OVRInput.Controller Controller;
@@ -28,13 +29,15 @@ namespace VRPhysicsInteraction
         public float VelocityStrength = 0.2f;
         public float BreakForce = 2000.0f;
 
-        public Rigidbody Rigidbody;
+        public bool IsGrabbing { get { return CurrentGrab != null; } }
+        public Rigidbody Rigidbody { get; private set; }
+
         private FixedJoint FixedJoint;
 
         private List<Collider> GrabColliders = new List<Collider>();
 
         private Collider CurrentOutlineCollider = null;
-        private Grabbable CurrentOutline = null;
+        public Grabbable CurrentOutline { get; private set; }
         private Grabbable CurrentGrab = null;
 
         private Finger[] FingersColliders;
@@ -56,6 +59,7 @@ namespace VRPhysicsInteraction
             // Layers
             HandRightLayer = LayerMask.NameToLayer("HandR");
             HandLeftLayer = LayerMask.NameToLayer("HandL");
+            PlayerLayer = LayerMask.NameToLayer("Player");
         }
 
         private void Update()
@@ -75,6 +79,7 @@ namespace VRPhysicsInteraction
             {
                 if (CurrentGrab == null && GrabColliders[0] != CurrentOutlineCollider)
                 {
+                    CurrentOutline?.EnableOutline(false);
                     CurrentOutlineCollider = GrabColliders[0];
                     CurrentOutline = GrabColliders[0].GetComponentInParent<Grabbable>();
                 }
@@ -173,12 +178,29 @@ namespace VRPhysicsInteraction
             }
         }
 
+        /// <summary>
+        /// Returns true if the object was grabbed, false otherwhise
+        /// </summary>
+        public bool GrabDistance(Vector3 origin, Vector3 dir, Grabbable objectToGrab, float distance)
+        {
+            if (CurrentOutline == null)
+            {
+                CurrentGrab = objectToGrab;
+                if (FixCurrentGrabbed(origin, dir, distance))
+                {
+                    CurrentGrab.SetGrabbed(true, Controller == OVRInput.Controller.RTouch);
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private void Grab()
         {
             if (CurrentOutline != null)
             {
                 CurrentGrab = CurrentOutline;
-                if (FixCurrentGrabbed())
+                if (FixCurrentGrabbed(Palm.position - Palm.forward * PalmRadius * 2, Palm.forward, PalmRadius * 3))
                 {
                     CurrentGrab.SetGrabbed(true, Controller == OVRInput.Controller.RTouch);
                     CurrentOutline.EnableOutline(false);
@@ -192,18 +214,27 @@ namespace VRPhysicsInteraction
             }
         }
 
+        private RaycastHit[] CastResults = new RaycastHit[32];
         /// <summary>
         /// Return true if the palm was adjusted, false otherwise
         /// </summary>
-        private bool AdjustPalm()
+        private bool AdjustPalm(Vector3 origin, Vector3 dir, float maxDistance)
         {
             int oppositeLayer = Controller == OVRInput.Controller.RTouch ? Grabbable.GrabbedLayerL : Grabbable.GrabbedLayerR;
-            if (Physics.SphereCast(Palm.position - Palm.forward * PalmRadius * 2, PalmRadius, Palm.forward, out RaycastHit hit, PalmRadius * 3, 1 << Grabbable.GrabbableLayer | 1 << oppositeLayer))
+            int n = Physics.SphereCastNonAlloc(origin, PalmRadius, dir, CastResults, maxDistance, 1 << Grabbable.GrabbableLayer | 1 << oppositeLayer);
+            if (n > 0)
             {
-                Vector3 offset = hit.point - Palm.position;
-                // TODO: Temporal
-                CurrentGrab.Rigidbody.MovePosition(CurrentGrab.Rigidbody.position - offset);
-                return true;
+                bool found = false;
+                int i;
+                for (i = 0; i < n && !found; ++i) if (CastResults[i].collider.gameObject == CurrentGrab.gameObject) found = true;
+                if (found)
+                {
+                    i -= 1;
+                    Vector3 offset = CastResults[i].point - Palm.position;
+                    // TODO: Temporal
+                    CurrentGrab.Rigidbody.MovePosition(CurrentGrab.Rigidbody.position - offset);
+                    return true;
+                }
             }
             return false;
         }
@@ -211,9 +242,9 @@ namespace VRPhysicsInteraction
         /// <summary>
         /// Return true if the current grabbed was successfully grabbed, false otherwhise
         /// </summary>
-        private bool FixCurrentGrabbed()
+        private bool FixCurrentGrabbed(Vector3 origin, Vector3 dir, float maxDistance)
         {
-            if (AdjustPalm())
+            if (AdjustPalm(origin, dir, maxDistance))
             {
                 StartCoroutine(AdjustFingers());
                 StartCoroutine(FixJointRigidbody(CurrentGrab.Rigidbody));
