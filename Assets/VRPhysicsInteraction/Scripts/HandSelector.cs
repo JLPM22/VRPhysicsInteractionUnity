@@ -21,7 +21,7 @@ namespace VRPhysicsInteraction
         private void Start()
         {
             RaycastLayer = ~(1 << Hand.HandLeftLayer | 1 << Hand.HandRightLayer | 1 << Hand.PlayerLayer |
-                             1 << Grabbable.GrabbedLayerB | 1 << Grabbable.GrabbedLayerL | 1 << Grabbable.GrabbedLayerR);
+                             1 << Hand.GrabbedLayerB | 1 << Hand.GrabbedLayerL | 1 << Hand.GrabbedLayerR);
         }
 
         private void Update()
@@ -50,7 +50,7 @@ namespace VRPhysicsInteraction
                     if (!SpherePointer.activeSelf) SpherePointer.SetActive(true);
                     SpherePointer.transform.position = hit.point;
                     // Grabbable
-                    if (hit.collider.gameObject.layer == Grabbable.GrabbableLayer)
+                    if (hit.collider.gameObject.layer == Hand.GrabbableLayer)
                     {
                         if (CurrentSelected != hit.collider.gameObject)
                         {

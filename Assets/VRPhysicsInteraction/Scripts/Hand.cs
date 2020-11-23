@@ -8,6 +8,10 @@ namespace VRPhysicsInteraction
     [RequireComponent(typeof(Rigidbody))]
     public class Hand : MonoBehaviour
     {
+        public static int GrabbableLayer = -1;
+        public static int GrabbedLayerR;
+        public static int GrabbedLayerL;
+        public static int GrabbedLayerB;
         public static int HandRightLayer;
         public static int HandLeftLayer;
         public static int PlayerLayer;
@@ -57,9 +61,16 @@ namespace VRPhysicsInteraction
             // Physics
             Rigidbody.centerOfMass = Vector3.zero;
             // Layers
-            HandRightLayer = LayerMask.NameToLayer("HandR");
-            HandLeftLayer = LayerMask.NameToLayer("HandL");
-            PlayerLayer = LayerMask.NameToLayer("Player");
+            if (GrabbableLayer == -1)
+            {
+                GrabbableLayer = LayerMask.NameToLayer("Grabbable");
+                GrabbedLayerR = LayerMask.NameToLayer("GrabbedR");
+                GrabbedLayerL = LayerMask.NameToLayer("GrabbedL");
+                GrabbedLayerB = LayerMask.NameToLayer("GrabbedB");
+                HandRightLayer = LayerMask.NameToLayer("HandR");
+                HandLeftLayer = LayerMask.NameToLayer("HandL");
+                PlayerLayer = LayerMask.NameToLayer("Player");
+            }
         }
 
         private void Update()
@@ -159,8 +170,8 @@ namespace VRPhysicsInteraction
 
         private void OnTriggerEnter(Collider other)
         {
-            int oppositeLayer = Controller == OVRInput.Controller.RTouch ? Grabbable.GrabbedLayerL : Grabbable.GrabbedLayerR;
-            if (other.gameObject.layer == Grabbable.GrabbableLayer || other.gameObject.layer == oppositeLayer)
+            int oppositeLayer = Controller == OVRInput.Controller.RTouch ? GrabbedLayerL : GrabbedLayerR;
+            if (other.gameObject.layer == GrabbableLayer || other.gameObject.layer == oppositeLayer)
             {
                 GrabColliders.Add(other);
             }
@@ -168,10 +179,10 @@ namespace VRPhysicsInteraction
 
         private void OnTriggerExit(Collider other)
         {
-            int test = other.gameObject.layer & (Grabbable.GrabbableLayer |
-                                                 Grabbable.GrabbedLayerB |
-                                                 Grabbable.GrabbedLayerL |
-                                                 Grabbable.GrabbedLayerR);
+            int test = other.gameObject.layer & (GrabbableLayer |
+                                                 GrabbedLayerB |
+                                                 GrabbedLayerL |
+                                                 GrabbedLayerR);
             if (test != 0)
             {
                 GrabColliders.Remove(other);
@@ -220,8 +231,8 @@ namespace VRPhysicsInteraction
         /// </summary>
         private bool AdjustPalm(Vector3 origin, Vector3 dir, float maxDistance)
         {
-            int oppositeLayer = Controller == OVRInput.Controller.RTouch ? Grabbable.GrabbedLayerL : Grabbable.GrabbedLayerR;
-            int n = Physics.SphereCastNonAlloc(origin, PalmRadius, dir, CastResults, maxDistance, 1 << Grabbable.GrabbableLayer | 1 << oppositeLayer);
+            int oppositeLayer = Controller == OVRInput.Controller.RTouch ? GrabbedLayerL : GrabbedLayerR;
+            int n = Physics.SphereCastNonAlloc(origin, PalmRadius, dir, CastResults, maxDistance, 1 << GrabbableLayer | 1 << oppositeLayer);
             if (n > 0)
             {
                 bool found = false;
@@ -262,7 +273,7 @@ namespace VRPhysicsInteraction
                 for (float t = 0.0f; t <= 1.0f; t += FingersInterpolationStep)
                 {
                     SetFingersInterpolation(f, t);
-                    if (Physics.CheckSphere(finger.transform.position, finger.Radius, 1 << Grabbable.GrabbableLayer))
+                    if (Physics.CheckSphere(finger.transform.position, finger.Radius, 1 << GrabbableLayer))
                     {
                         break;
                     }

@@ -7,11 +7,6 @@ namespace VRPhysicsInteraction
     [RequireComponent(typeof(Rigidbody))]
     public class Grabbable : MonoBehaviour
     {
-        public static int GrabbableLayer = -1;
-        public static int GrabbedLayerR;
-        public static int GrabbedLayerL;
-        public static int GrabbedLayerB;
-
         [Header("General Settings")]
         public bool ContinuousPhsyics = true;
         public Material OutlineMat;
@@ -39,18 +34,14 @@ namespace VRPhysicsInteraction
             // Physics
             Rigidbody = GetComponent<Rigidbody>();
             Rigidbody.collisionDetectionMode = ContinuousPhsyics ? CollisionDetectionMode.Continuous : CollisionDetectionMode.Discrete;
-            // Layers
-            if (GrabbableLayer == -1)
-            {
-                GrabbableLayer = LayerMask.NameToLayer("Grabbable");
-                GrabbedLayerR = LayerMask.NameToLayer("GrabbedR");
-                GrabbedLayerL = LayerMask.NameToLayer("GrabbedL");
-                GrabbedLayerB = LayerMask.NameToLayer("GrabbedB");
-            }
-            Utils.SetLayerRecursively(gameObject, GrabbableLayer);
             // Outline
             CreateOutline();
             EnableOutline(false);
+        }
+
+        private void Start()
+        {
+            Utils.SetLayerRecursively(gameObject, Hand.GrabbableLayer);
         }
 
         public void SetGrabbed(bool value, bool isHandRight)
@@ -60,14 +51,14 @@ namespace VRPhysicsInteraction
             {
                 if (isHandRight)
                 {
-                    if (IsGrabbedLeft) Utils.SetLayerRecursively(gameObject, GrabbedLayerB);
-                    else Utils.SetLayerRecursively(gameObject, GrabbedLayerR);
+                    if (IsGrabbedLeft) Utils.SetLayerRecursively(gameObject, Hand.GrabbedLayerB);
+                    else Utils.SetLayerRecursively(gameObject, Hand.GrabbedLayerR);
                     IsGrabbedRight = true;
                 }
                 else
                 {
-                    if (IsGrabbedRight) Utils.SetLayerRecursively(gameObject, GrabbedLayerB);
-                    else Utils.SetLayerRecursively(gameObject, GrabbedLayerL);
+                    if (IsGrabbedRight) Utils.SetLayerRecursively(gameObject, Hand.GrabbedLayerB);
+                    else Utils.SetLayerRecursively(gameObject, Hand.GrabbedLayerL);
                     IsGrabbedLeft = true;
                 }
             }
@@ -76,14 +67,14 @@ namespace VRPhysicsInteraction
                 if (isHandRight)
                 {
                     IsGrabbedRight = false;
-                    if (IsGrabbedLeft) Utils.SetLayerRecursively(gameObject, GrabbedLayerL);
-                    else Utils.SetLayerRecursively(gameObject, GrabbableLayer);
+                    if (IsGrabbedLeft) Utils.SetLayerRecursively(gameObject, Hand.GrabbedLayerL);
+                    else Utils.SetLayerRecursively(gameObject, Hand.GrabbableLayer);
                 }
                 else
                 {
                     IsGrabbedLeft = false;
-                    if (IsGrabbedRight) Utils.SetLayerRecursively(gameObject, GrabbedLayerR);
-                    else Utils.SetLayerRecursively(gameObject, GrabbedLayerL);
+                    if (IsGrabbedRight) Utils.SetLayerRecursively(gameObject, Hand.GrabbedLayerR);
+                    else Utils.SetLayerRecursively(gameObject, Hand.GrabbableLayer);
                 }
 
             }
@@ -103,6 +94,7 @@ namespace VRPhysicsInteraction
             Outline.AddComponent<MeshFilter>().sharedMesh = GetComponent<MeshFilter>().sharedMesh;
             Outline.AddComponent<MeshRenderer>().sharedMaterial = OutlineMat;
             Outline.transform.localPosition = Vector3.zero;
+            Outline.transform.localRotation = Quaternion.identity;
             Outline.transform.localScale = new Vector3(1.01f, 1.01f, 1.01f);
         }
     }

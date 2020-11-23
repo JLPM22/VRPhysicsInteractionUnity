@@ -12,7 +12,7 @@ namespace VRMovement
         public bool EnableJoystick;
         public bool EnableTeleport;
         [Header("Joystick")]
-        public float Speed = 1.0f;
+        public float Speed = 2.0f;
         /// <summary>
         /// The rate of additional damping when moving sideways or backwards.
         /// </summary>
@@ -21,7 +21,7 @@ namespace VRMovement
         /// Modifies the strength of gravity.
         /// </summary>
         public float GravityModifier = 1.0f;
-        public float Acceleration = 2.0f;
+        public float Acceleration = 10.0f;
         [Header("Hands")]
         public Hand HandRight;
         public Hand HandLeft;
@@ -59,8 +59,8 @@ namespace VRMovement
 
         private void Start()
         {
-            TeleportLayerMask = ~(1 << Hand.HandLeftLayer | 1 << Hand.HandRightLayer | 1 << Grabbable.GrabbableLayer | 1 << Hand.PlayerLayer |
-                                  1 << Grabbable.GrabbedLayerB | 1 << Grabbable.GrabbedLayerL | 1 << Grabbable.GrabbedLayerR);
+            TeleportLayerMask = ~(1 << Hand.HandLeftLayer | 1 << Hand.HandRightLayer | 1 << Hand.GrabbableLayer | 1 << Hand.PlayerLayer |
+                                  1 << Hand.GrabbedLayerB | 1 << Hand.GrabbedLayerL | 1 << Hand.GrabbedLayerR);
         }
 
         private void OnEnable()
@@ -87,6 +87,7 @@ namespace VRMovement
             Vector3 prevPos = root.position;
             Quaternion prevRot = root.rotation;
 
+            transform.position = new Vector3(CameraRig.trackingSpace.position.x, transform.position.y, CameraRig.trackingSpace.position.z);
             transform.rotation = Quaternion.Euler(0.0f, centerEye.rotation.eulerAngles.y, 0.0f);
 
             root.position = prevPos;

@@ -26,6 +26,8 @@ namespace VRPhysicsInteraction
 
             GUILayout.Space(10.0f);
 
+            EditorGUILayout.LabelField("Pose Settings", EditorStyles.boldLabel);
+
             if (GUILayout.Button("Save Open Pose"))
             {
                 SaveFingersLocalRotations(hand, openArray);
